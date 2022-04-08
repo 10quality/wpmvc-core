@@ -122,4 +122,47 @@ class Request
         }
         return $value;
     }
+     /**
+     * Validate Request
+     * @param array $items
+     */
+    public static function validate($items)
+    {
+        $response = new \WPMVC\Response;
+
+        foreach ($items as $item => $rules) {
+
+            //Check for Rules
+            if (is_string($rules)) {
+                $rules = explode('|', $rules);
+            }
+
+            $value = self::input($item);
+
+            foreach ($rules as $rule) {
+                $itemCaps = ucwords(str_replace("_", " ", $item));
+
+                switch ($rule) {
+                    case 'required':
+                        if (empty($value)) {
+                            $response->error($item, "$itemCaps is required");
+                        }
+                        break;
+                    case 'numeric':
+                        if (!is_numeric($value)) {
+                            $response->error($item, "$itemCaps must be a number number");
+                        }
+                        break;
+                }
+            }
+        }
+
+        if ($response->passes) {
+            return true;
+        }
+
+        $response->json();
+    }
+    
+    
 }
