@@ -122,4 +122,62 @@ class Request
         }
         return $value;
     }
+   /**
+     * Validate Request
+     * @param array $items
+     */
+    public static function validate($items)
+    {
+        $response = new \WPMVC\Response;
+
+        foreach ($items as $item => $rules) {
+
+            //Check for Rules
+            if (is_string($rules)) {
+                $rules = (explode('|', trim($rules)));
+            }
+
+            $value = self::input($item);
+
+            foreach ($rules as $rule) {
+                $itemCaps = ucwords(str_replace("_", " ", $item));
+
+                switch ($rule) {
+                    case 'required':
+                        if (empty($value)) {
+                            $response->error($item, "$itemCaps is Required");
+                        }
+                        break;
+                    case 'numeric':
+                        if (!is_numeric($value)) {
+                            $response->error($item, "$itemCaps must be a Number");
+                        }
+                        break;
+                    case 'alphabetic':
+                        if (!ctype_alpha(str_replace(array(' ', "'", '-'), '', $value))) {
+                            $response->error($item, "$itemCaps contains illegal characters. Only alphabetic letters A-Z, \"'\", \" \" and \"-\" are allowed");
+                        }
+                        break;
+                    case 'alphanumeric':
+                        if (!ctype_alnum($value)) {
+                            $response->error($item, "<b>{$itemCaps}</b> contains illegal characters. Only alphabetic and numeric characters (A-Z and 0-9) are allowed");
+                        }
+                        break;
+                    case 'email':
+                        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                            $response->error($item, "$value must be a valid email address");
+                        }
+                        break;
+                }
+            }
+        }
+
+        if ($response->passes) {
+            return true;
+        }
+
+        $response->json();
+    }
+    
+    
 }
