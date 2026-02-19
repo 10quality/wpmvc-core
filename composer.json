@@ -32,9 +32,7 @@
         }
     },
     "scripts": {
-        "test": [
-            "phpunit"
-        ]
+        "test": "vendor/bin/phpunit"
     },
     "minimum-stability": "dev"
 }

@@ -81,7 +81,10 @@ class Log implements Loggable
     public static function info( $message )
     {
         $logger = self::instance();
-        if ( $logger ) {
+        if ( defined( 'WP_TESTS_CONFIG_FILE_PATH' ) && !empty( WP_TESTS_CONFIG_FILE_PATH ) ) {
+            if ( function_exists( '_wpmvc_log_info' ) )
+                _wpmvc_test_log_info( $message );
+        } elseif ( $logger ) {
             $logger->info( $message );
         }
     }
@@ -95,7 +98,10 @@ class Log implements Loggable
     public static function debug( $message, $values = null )
     {
         $logger = self::instance();
-        if ( $logger ) {
+        if ( defined( 'WP_TESTS_CONFIG_FILE_PATH' ) && !empty( WP_TESTS_CONFIG_FILE_PATH ) ) {
+            if ( function_exists( '_wpmvc_test_log' ) )
+                _wpmvc_test_log( 'debug', $message, $values );
+        } elseif ( $logger ) {
             $logger->debug(
                 is_string( $message ) ? $message : 'value',
                 $values === null && ! is_string( $message )
@@ -119,7 +125,10 @@ class Log implements Loggable
     public static function error( $e )
     {
         $logger = self::instance();
-        if ( $logger ) {
+        if ( defined( 'WP_TESTS_CONFIG_FILE_PATH' ) && !empty( WP_TESTS_CONFIG_FILE_PATH ) ) {
+            if ( function_exists( '_wpmvc_test_log' ) )
+                _wpmvc_test_log( 'error', $e );
+        } elseif ( $logger ) {
             $logger->error( $e );
         }
     }
