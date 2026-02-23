@@ -98,11 +98,14 @@ class BridgeTest extends TestCase
         // Prepare
         global $config;
         $main = new Main($config);
-        $main->add_action( 'test', 'TestController@filter', ['override'] );
+        $main->add_action( 'test1', 'TestController@filter', ['override'] );
+        $main->add_action( 'test2', [\UnitTesting\Controllers\TestController::class, 'filter'], ['override'] );
         // Exec
-        $return = $main->{'_c_return_TestController@filter'}(123);
+        $return1 = $main->{'_c_return_TestController@filter'}(123);
+        $return2 = $main->{'_c_return_TestController@filter'}(123);
         // Assert
-        $this->assertEquals('override', $return);
+        $this->assertEquals('override', $return1);
+        $this->assertEquals('override', $return2);
     }
     /**
      * Tests view parameter override.
@@ -169,13 +172,16 @@ class BridgeTest extends TestCase
         $main = new Main($config);
         // Run
         $main->add_action( 'test', 'TestController@testing' );
-        $main->add_action( 'test2', 'view@test2' );
+        $main->add_action( 'test2', [\UnitTesting\Controllers\TestController::class, 'testing'] );
+        $main->add_action( 'test3', 'view@test2' );
         $main->add_hooks();
         // Assert
         $this->assertArrayHasKey('test', $hooks['actions']);
         $this->assertArrayHasKey('test2', $hooks['actions']);
+        $this->assertArrayHasKey('test3', $hooks['actions']);
         $this->assertEquals('[{},"_c_void_TestController@testing"]', json_encode($hooks['actions']['test']));
-        $this->assertEquals('[{},"_v_void_view@test2"]', json_encode($hooks['actions']['test2']));
+        $this->assertEquals('[{},"_c_void_TestController@testing"]', json_encode($hooks['actions']['test2']));
+        $this->assertEquals('[{},"_v_void_view@test2"]', json_encode($hooks['actions']['test3']));
     }
     /**
      * Test method.
@@ -191,11 +197,14 @@ class BridgeTest extends TestCase
         global $hooks;
         $main = new Main($config);
         // Run
-        $main->add_filter( 'controller', 'FilterController@filtering' );
+        $main->add_filter( 'controller1', 'FilterController@filtering' );
+        $main->add_filter( 'controller2', [\UnitTesting\Controllers\TestController::class, 'filter'] );
         $main->add_hooks();
         // Assert
-        $this->assertArrayHasKey('controller', $hooks['filters']);
-        $this->assertEquals('[{},"_c_return_FilterController@filtering"]', json_encode($hooks['filters']['controller']));
+        $this->assertArrayHasKey('controller1', $hooks['filters']);
+        $this->assertArrayHasKey('controller2', $hooks['filters']);
+        $this->assertEquals('[{},"_c_return_FilterController@filtering"]', json_encode($hooks['filters']['controller1']));
+        $this->assertEquals('[{},"_c_return_TestController@filter"]', json_encode($hooks['filters']['controller2']));
     }
     /**
      * Test method.
@@ -212,12 +221,17 @@ class BridgeTest extends TestCase
         $main = new Main($config);
         // Run
         $main->add_action( 'action1', 'ActionController@to_remove' );
+        $main->add_action( 'action2', [\UnitTesting\Controllers\TestController::class, 'action'] );
         $main->add_hooks();
         $main->remove_action( 'action1', 'ActionController@to_remove' );
+        $main->remove_action( 'action2', [\UnitTesting\Controllers\TestController::class, 'action'] );
         // Assert
         $this->assertArrayNotHasKey('action1', $hooks['actions']);
         $this->assertArrayHasKey('action1', $hooks['removed']);
+        $this->assertArrayNotHasKey('action2', $hooks['actions']);
+        $this->assertArrayHasKey('action2', $hooks['removed']);
         $this->assertEquals('[{},"_c_void_ActionController@to_remove"]', json_encode($hooks['removed']['action1']));
+        $this->assertEquals('[{},"_c_void_TestController@action"]', json_encode($hooks['removed']['action2']));
     }
     /**
      * Test method.
@@ -234,11 +248,16 @@ class BridgeTest extends TestCase
         $main = new Main($config);
         // Run
         $main->add_filter( 'filter1', 'FilterController@to_remove' );
+        $main->add_filter( 'filter2', [\UnitTesting\Controllers\TestController::class, 'filter'] );
         $main->add_hooks();
         $main->remove_filter( 'filter1', 'FilterController@to_remove' );
+        $main->remove_filter( 'filter2', [\UnitTesting\Controllers\TestController::class, 'filter'] );
         // Assert
         $this->assertArrayNotHasKey('filter1', $hooks['filters']);
         $this->assertArrayHasKey('filter1', $hooks['removed']);
+        $this->assertArrayNotHasKey('filter2', $hooks['filters']);
+        $this->assertArrayHasKey('filter2', $hooks['removed']);
         $this->assertEquals('[{},"_c_return_FilterController@to_remove"]', json_encode($hooks['removed']['filter1']));
+        $this->assertEquals('[{},"_c_return_TestController@filter"]', json_encode($hooks['removed']['filter2']));
     }
 }
