@@ -43,7 +43,11 @@ class Cache implements Cacheable
 					|| $cache['storage'] == 'files' )
 				&& ! is_dir( $cache['path'] )
 			) {
-				mkdir( $cache['path'], 0777, true );
+				if ( $config->get( 'mkdir' ) === 'mkdir' ) {
+					mkdir( $cache['path'], 0777, true );
+				} else {
+					wp_mkdir_p( $cache['path'] );
+				}
 			}
 			// Init cache
 			phpFastCache::setup( $cache );

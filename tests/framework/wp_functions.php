@@ -128,3 +128,7 @@ function icl_object_id()
 {
     return uniqid();
 }
+function wp_mkdir_p($path)
+{
+    return mkdir( $path, 0777, true );
+}

@@ -43,7 +43,11 @@ class Log implements Loggable
                 : $config->get( 'paths.log' );
             // Create folder
             if ( ! is_dir( $path ) ) {
-                mkdir( $path, 0777, true );
+                if ( $config->get( 'mkdir' ) === 'mkdir' ) {
+                    mkdir( $path, 0777, true );
+                } else {
+                    wp_mkdir_p( $path );
+                }
             }
             // Init logger
             self::$path = $path;
